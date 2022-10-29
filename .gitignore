@@ -1,0 +1,5 @@
+.idea
+dist
+mlsql_plugin_tool.egg-info
+build
+publish.sh
