@@ -37,6 +37,7 @@ setup(
     license='http://www.apache.org/licenses/LICENSE-2.0',
     install_requires=[
         'numpy',
+        'pandas',
         'Cython',
         'pycocotools',
         'opencv-python'
