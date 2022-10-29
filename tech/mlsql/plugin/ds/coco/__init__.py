@@ -1,16 +1,17 @@
 import json
 import os
-import cv2
+import itertools
 
 
 def create_coco_format_json(rows, target_dir: str):
+    import cv2
     image_path = os.path.join(target_dir, "images")
     annotation_path = os.path.join(target_dir, "annotations")
 
-    if os.path.exists(annotation_path):
+    if not os.path.exists(annotation_path):
         os.makedirs(annotation_path)
 
-    if os.path.exists(image_path):
+    if not os.path.exists(image_path):
         os.makedirs(image_path)
 
     coco_format = {
@@ -27,12 +28,12 @@ def create_coco_format_json(rows, target_dir: str):
     row_index = 0
     for row in rows:
         row_index += 1
-        name: str = row.name
+        name: str = row["name"]
         img_path = os.path.join(image_path, name)
         with open(img_path, "wb") as f:
-            f.write(row.data)
+            f.write(row["data"])
 
-        meta_str: str = row.meta
+        meta_str: str = row["meta"]
         meta = json.loads(meta_str)
 
         img = cv2.imread(img_path)
@@ -46,14 +47,14 @@ def create_coco_format_json(rows, target_dir: str):
             "id": row_index
         })
 
-        for obj in meta.data.result.objects:
+        for obj in meta["data"]["result"]["objects"]:
 
-            if obj.classType not in catagories:
-                catagories.append(obj.classType)
+            if obj["classType"] not in catagories:
+                catagories.append(obj["classType"])
 
-            category_id = catagories.index(obj.classType)
+            category_id = catagories.index(obj["classType"])
 
-            segmentation = [[(item.x, item.y) for item in obj.coordinate]]
+            segmentation = [list(itertools.chain(*[[item["x"], item["y"]] for item in obj["coordinate"]]))]
             coco_format["annotations"].append({
                 "segmentation": segmentation,
                 "area": 0.0,

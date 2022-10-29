@@ -4,3 +4,5 @@ mlsql_plugin_tool.egg-info
 build
 publish.sh
 .eggs/
+**/__pycache__/**
+*.egg-info

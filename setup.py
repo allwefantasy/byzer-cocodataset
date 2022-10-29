@@ -38,8 +38,7 @@ setup(
     install_requires=[
         'numpy',
         'pandas',
-        'Cython',
-        'pycocotools',
+        'pypandoc',
         'opencv-python'
     ],
     setup_requires=['pypandoc'],
