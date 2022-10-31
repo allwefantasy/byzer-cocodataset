@@ -4,7 +4,7 @@ import itertools
 
 
 def create_coco_format_json(rows, target_dir: str):
-    import cv2
+    from PIL import Image
     image_path = os.path.join(target_dir, "images")
     annotation_path = os.path.join(target_dir, "annotations")
 
@@ -23,7 +23,7 @@ def create_coco_format_json(rows, target_dir: str):
         "annotations": []
     }
 
-    catagories = []
+    categories = []
 
     row_index = 0
     for row in rows:
@@ -36,10 +36,9 @@ def create_coco_format_json(rows, target_dir: str):
         meta_str: str = row["meta"]
         meta = json.loads(meta_str)
 
-        img = cv2.imread(img_path)
-        img_height = img.shape[0]
-        img_width = img.shape[1]
-        img_channels = img.shape[2]
+        img = Image.open(img_path)
+        img_height = img.height
+        img_width = img.width
 
         coco_format["images"].append({
             "license": 0, "file_name": name, "coco_url": "",
@@ -49,22 +48,30 @@ def create_coco_format_json(rows, target_dir: str):
 
         for obj in meta["data"]["result"]["objects"]:
 
-            if obj["classType"] not in catagories:
-                catagories.append(obj["classType"])
+            if obj["classType"] not in categories:
+                categories.append(obj["classType"])
 
-            category_id = catagories.index(obj["classType"])
+            category_id = categories.index(obj["classType"]) + 1
 
             segmentation = [list(itertools.chain(*[[item["x"], item["y"]] for item in obj["coordinate"]]))]
             coco_format["annotations"].append({
                 "segmentation": segmentation,
                 "area": 0.0,
                 "iscrowd": 0, "image_id": row_index,
-                "bbox": [], "category_id": category_id,
+                "bbox": [0, 0, 100, 100], "category_id": category_id,
                 "id": row_index, "caption": ""
             })
-        coco_meta_json = json.dumps(coco_format)
-        coco_meta_path = os.path.join(annotation_path, "coco.json")
-        with open(coco_meta_path, "w", encoding='utf-8') as f:
-            f.write(coco_meta_json)
+    for idx, cate in enumerate(categories):
+        coco_format["categories"].append({
+            "supercategory": "",
+            "id": idx + 1,
+            "name": cate,
+            "keypoints": [],
+            "skeleton": []
+        })
+    coco_meta_json = json.dumps(coco_format)
+    coco_meta_path = os.path.join(annotation_path, "coco.json")
+    with open(coco_meta_path, "w", encoding='utf-8') as f:
+        f.write(coco_meta_json)
 
-        return coco_meta_path
+    return coco_meta_path

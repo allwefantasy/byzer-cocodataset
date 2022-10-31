@@ -39,7 +39,7 @@ setup(
         'numpy',
         'pandas',
         'pypandoc',
-        'opencv-python'
+        'Pillow'
     ],
     setup_requires=['pypandoc'],
     classifiers=[
